@@ -36,52 +36,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "redis": {
-          "$ref": "#/definitions/Service"
-        },
-        "adService": {
-          "$ref": "#/definitions/Service"
-        },
-        "cartService": {
-          "$ref": "#/definitions/Service"
-        },
-        "checkoutService": {
-          "$ref": "#/definitions/Service"
-        },
-        "currencyService": {
-          "$ref": "#/definitions/Service"
-        },
-        "emailService": {
-          "$ref": "#/definitions/Service"
-        },
-        "featureflagService": {
-          "$ref": "#/definitions/Service"
-        },
-        "ffsPostgres": {
-          "$ref": "#/definitions/Service"
-        },
-        "frontend": {
-          "$ref": "#/definitions/Service"
-        },
-        "frontendproxy": {
-          "$ref": "#/definitions/Service"
-        },
-        "loadgenerator": {
-          "$ref": "#/definitions/Service"
-        },
-        "paymentService": {
-          "$ref": "#/definitions/Service"
-        },
-        "productCatalogService": {
-          "$ref": "#/definitions/Service"
-        },
-        "recommendationService": {
-          "$ref": "#/definitions/Service"
-        },
-        "shippingService": {
-          "$ref": "#/definitions/Service"
-        },
-        "quoteService": {
+        "whataservice": {
           "$ref": "#/definitions/Service"
         }
       },
