@@ -2,10 +2,16 @@ FROM eclipse-temurin:19-jdk AS builder
 
 WORKDIR /usr/src/app
 
-COPY ./ ./
+# get the dependencies only
+COPY ./mnvw .
 RUN chmod u+x mvnw
-RUN ./mvnw verify --fail-never
-RUN ./mvnw install
+
+COPY pom.xml .
+RUN ./mvnw dependency:resolve
+
+# now bring in the source and build it
+COPY ./src ./src
+RUN ./mvnw package
 
 #-----
 
