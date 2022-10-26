@@ -3,14 +3,16 @@ FROM eclipse-temurin:19-jdk AS builder
 WORKDIR /usr/src/app
 
 # get the dependencies only
-COPY ./mnvw .
+COPY mvnw ./
+COPY .mvn/ .mvn/
 RUN chmod u+x mvnw
 
-COPY pom.xml .
-RUN ./mvnw dependency:resolve
+COPY pom.xml ./
+RUN ./mvnw dependency:go-offline
 
 # now bring in the source and build it
 COPY ./src ./src
+# i wish I could use -o, but somehow not all the deps have been downloaded. Still, it's fewer
 RUN ./mvnw package
 
 #-----
