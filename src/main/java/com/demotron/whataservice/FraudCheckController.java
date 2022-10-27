@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 
@@ -47,9 +49,10 @@ public class FraudCheckController {
 	private static final String OK = "Can't complain";
 	@WithSpan
 	public String beSerious(@SpanAttribute("app.currencyCode") String currencyCode) throws IOException {
-
+		Span span = Span.current();
 		Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/ISO_4217").get();
 		System.out.println(doc.title());
+		span.setAttribute("app.sourceOfInfo", doc.title());
 		Elements currencyCodeRows = doc.select("td:containsOwn(" + currencyCode + ")");
 		for (Element currencyCodeTd : currencyCodeRows) {
 			String moreInfoUrl = currencyCodeTd.nextElementSibling().nextElementSibling().nextElementSibling().select("a[href]").first().absUrl("href");
@@ -64,10 +67,12 @@ public class FraudCheckController {
 	}
 
 	private String distrustHighInflation(String information) {
-     if (information.matches("high inflation") || information.matches("hyperinflation") ) {
+		Span span = Span.current();
+		span.setAttribute("app.information", information);
+		if (information.matches("high inflation") || information.matches("hyperinflation") ) {
 			return "Oh, that currency is high inflation";
-		 }
-		 return null;
+		}
+		return null;
 	}
 
 }
