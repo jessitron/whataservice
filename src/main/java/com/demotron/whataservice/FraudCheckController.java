@@ -3,6 +3,7 @@ package com.demotron.whataservice;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.instrumentation.annotations.SpanAttribute;
@@ -41,38 +44,54 @@ public class FraudCheckController {
 	public Map<String,Object> index(@RequestBody ChargeRequest input) throws IOException {
 		var out = new HashMap<String, Object>();
 		out.put("currencyCode", input.amount.currencyCode);
-		out.put("sus", beSerious(input.amount.currencyCode).equals(OK));
-		out.put("message", beSerious(input.amount.currencyCode));
+		out.put("sus", specialFraudChecks(input.amount.currencyCode).equals(OK));
+		out.put("message", specialFraudChecks(input.amount.currencyCode));
 		return out;
 	}
 
-	private static final String OK = "Can't complain";
-	@WithSpan
-	public String beSerious(@SpanAttribute("app.currencyCode") String currencyCode) throws IOException {
-		Span span = Span.current();
-		Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/ISO_4217").get();
-		System.out.println(doc.title());
-		span.setAttribute("app.sourceOfInfo", doc.title());
-		Elements currencyCodeRows = doc.select("td:containsOwn(" + currencyCode + ")");
-		for (Element currencyCodeTd : currencyCodeRows) {
-			String moreInfoUrl = currencyCodeTd.nextElementSibling().nextElementSibling().nextElementSibling().select("a[href]").first().absUrl("href");
-			System.out.println(moreInfoUrl);
-			Document moreInfoDoc = Jsoup.connect(moreInfoUrl).get();
-			String check = distrustHighInflation(moreInfoDoc.body().text());
-			if (check != null) {
-				return check;
+	@WithSpan("special fraud check")
+	private String specialFraudChecks(String currencyCode) {
+    for (int i = 0; i < FraudCheckFunctions.allChecks.size(); i++) 
+		{
+			var checker = FraudCheckFunctions.allChecks.get(i);
+			var result = performOneCheck(currencyCode, checker);
+			if (result != null) {
+				return result;
 			}
 		}
 		return OK;
 	}
+	private static final String OK = "Can't complain";
 
-	private String distrustHighInflation(String information) {
+	@WithSpan("one check")
+	public String performOneCheck(@SpanAttribute("app.currencyCode") String currencyCode, Function<String, String> checker) {
 		Span span = Span.current();
-		span.setAttribute("app.information", information);
-		if (information.matches("high inflation") || information.matches("hyperinflation") ) {
-			return "Oh, that currency is high inflation";
+		try {
+			Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/ISO_4217").get();
+			System.out.println(doc.title());
+			span.setAttribute("app.sourceOfInfo", doc.title());
+			Elements currencyCodeRows = doc.select("td:containsOwn(" + currencyCode + ")");
+			for (Element currencyCodeTd : currencyCodeRows) {
+				try {
+					String moreInfoUrl = currencyCodeTd.nextElementSibling().nextElementSibling().nextElementSibling().select("a[href]").first().absUrl("href");
+					System.out.println(moreInfoUrl);
+					Document moreInfoDoc = Jsoup.connect(moreInfoUrl).get();
+					String check = checker.apply(moreInfoDoc.body().text());
+					if (check != null) {
+						return check;
+					}
+				} catch (Exception e) {
+					// well, there might be another one
+					span.recordException(e, Attributes.of(AttributeKey.stringKey("currencyCodeTd"), currencyCodeTd.html()));
+				}
+			}
+		} catch(Exception e) {
+			span.recordException(e, null);
+			e.printStackTrace();
+			return "Failed to check";
 		}
 		return null;
 	}
+
 
 }
