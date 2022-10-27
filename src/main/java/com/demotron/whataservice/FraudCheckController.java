@@ -50,9 +50,10 @@ public class FraudCheckController {
 
 		Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/ISO_4217").get();
 		System.out.println(doc.title());
-		Elements currencyCodeRows = doc.select("td:containsOwn(CAD)");
+		Elements currencyCodeRows = doc.select("td:containsOwn(" + currencyCode + ")");
 		for (Element currencyCodeTd : currencyCodeRows) {
 			String moreInfoUrl = currencyCodeTd.nextElementSibling().nextElementSibling().nextElementSibling().select("a[href]").first().absUrl("href");
+			System.out.println(moreInfoUrl);
 			Document moreInfoDoc = Jsoup.connect(moreInfoUrl).get();
 			String check = distrustHighInflation(moreInfoDoc.body().text());
 			if (check != null) {
