@@ -24,11 +24,13 @@ public class FraudCheckController {
 	
 
 
+	/* TODO: error handling. Gives a 500 NPE on invalid input 😱 */
 	@PostMapping(value = "/",
 		 produces = "application/json")
-	@ResponseBody
+	@ResponseBody 
 	public Map<String,Object> index(@RequestBody ChargeRequest input) {
 		var out = new HashMap<String, Object>();
+		out.put("currencyCode", input.amount.currencyCode);
 		out.put("sus", false);
 		return out;
 	}
