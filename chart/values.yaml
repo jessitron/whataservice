@@ -5,8 +5,8 @@ observability:
     enabled: true
   sendTelemetry:
     enabled: true
-    location: "otelcol:4317"
-    locationHttp: "otelcol:4318"
+    location: "qcon-workshop-otelcol:4317"
+    locationHttp: "qcon-workshop-otelcol:4318"
 
 default:
   env:
@@ -40,7 +40,6 @@ image:
 serviceAccount: ""
 
 components:
-
   whataservice:
     enabled: true
     useDefault:

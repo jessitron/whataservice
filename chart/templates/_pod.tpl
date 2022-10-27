@@ -84,14 +84,14 @@ Exclude email service and treat differently because the addr. for the email serv
 {{- if .observability.sendTelemetry.enabled }}
 {{- if eq .name "quote-service" }}
 - name: OTEL_EXPORTER_OTLP_ENDPOINT
-  value: {{ include "otel-demo.name" . }}-{{ .observability.sendTelemetry.location }}
+  value: {{ .observability.sendTelemetry.location }}
 {{- else }}
 - name: OTEL_EXPORTER_OTLP_ENDPOINT
-  value: http://{{ include "otel-demo.name" . }}-{{ .observability.sendTelemetry.location }}
+  value: http://{{ .observability.sendTelemetry.location }}
 {{- end }}
 {{- if eq .name "shipping-service" }}
 - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-  value: http://{{ include "otel-demo.name" . }}-{{ .observability.sendTelemetry.location }}
+  value: http://{{ .observability.sendTelemetry.location }}
 {{- end }}
 
 {{- end }}
