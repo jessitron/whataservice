@@ -18,7 +18,7 @@ build:
 deploy:
   helm:
     releases:
-      - name: try-this
+      - name: qcon-workshop
         chartPath: chart
         recreatePods: false
         skipBuildDependencies: false
