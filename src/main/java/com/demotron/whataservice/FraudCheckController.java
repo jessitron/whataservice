@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+
 @RestController
 public class FraudCheckController {
 
@@ -31,7 +34,12 @@ public class FraudCheckController {
 	public Map<String,Object> index(@RequestBody ChargeRequest input) {
 		var out = new HashMap<String, Object>();
 		out.put("currencyCode", input.amount.currencyCode);
-		out.put("sus", false);
+		out.put("sus", beSerious(input.amount.currencyCode));
 		return out;
+	}
+
+	@WithSpan
+	public boolean beSerious(@SpanAttribute("app.currencyCode") String currencyCode) {
+		return false;
 	}
 }
