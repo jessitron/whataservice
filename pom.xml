@@ -57,6 +57,11 @@
             <artifactId>opentelemetry-semconv</artifactId>
             <version>1.19.0-alpha</version>
         </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-spring-webmvc-5.3</artifactId>
+            <version>1.19.1-alpha</version>
+        </dependency>
     </dependencies>
 
     <build>

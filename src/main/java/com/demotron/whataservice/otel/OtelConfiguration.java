@@ -24,6 +24,7 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
 public interface OtelConfiguration {
@@ -46,6 +47,7 @@ public interface OtelConfiguration {
             .merge(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "whataservice")));
 
         SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
+            .setSampler(Sampler.alwaysOn())
             .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.getDefault()).build())
             .setResource(resource)
             .build();

@@ -1,7 +1,10 @@
 package com.demotron.whataservice;
 
+import javax.servlet.Filter;
+
 import com.demotron.whataservice.otel.OtelConfiguration;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.instrumentation.spring.webmvc.v5_3.SpringWebMvcTelemetry;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +20,11 @@ public class WhataserviceApplication {
     @Bean
     public OpenTelemetry openTelemetry() {
         return OtelConfiguration.initOpenTelemetry();
+    }
+
+    @Bean
+    public Filter telemetryFilter(OpenTelemetry openTelemetry) {
+        return SpringWebMvcTelemetry.create(openTelemetry).createServletFilter();
     }
 
 }
