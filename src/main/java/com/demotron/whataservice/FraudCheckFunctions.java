@@ -9,7 +9,10 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 
 public class FraudCheckFunctions {
 
-  public static List<Function<String,String>> allChecks = List.of(FraudCheckFunctions::distrustHighInflation, FraudCheckFunctions::distrustSocialism);
+  public static List<Function<String,String>> allChecks = List.of(
+    FraudCheckFunctions::distrustVolatility, 
+    FraudCheckFunctions::distrustHighInflation, 
+    FraudCheckFunctions::distrustSocialism);
 
   @WithSpan("check for hyperinflation")
 	public static String distrustHighInflation(@SpanAttribute("parameter.information") String information) {
@@ -27,6 +30,16 @@ public class FraudCheckFunctions {
 		span.setAttribute("app.information", information);
 		if ( information.matches(".*socialism.*") ) {
 			return "Oh, that currency can't be trusted";
+		}
+		return null;
+	}
+
+  @WithSpan("check for volatility")
+	public static String distrustVolatility(@SpanAttribute("parameter.information") String information) {
+		Span span = Span.current();
+		span.setAttribute("app.information", information);
+		if ( information.matches(".*high volatility.*") || information.matches(".*extreme volatility.*")) {
+			return "Oh, that currency is too volatile";
 		}
 		return null;
 	}
