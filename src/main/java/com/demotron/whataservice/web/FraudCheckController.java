@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class FraudCheckController {
 
-    private CurrencyService currencyService;
+    private final Tracer tracer;
 
-    private OpenTelemetry openTelemetry;
+    private CurrencyService currencyService;
 
     public FraudCheckController(CurrencyService currencyService, OpenTelemetry openTelemetry) {
         this.currencyService = currencyService;
-        this.openTelemetry = openTelemetry;
+        this.tracer = openTelemetry.getTracer(OtelConfiguration.TRACER_NAME);
     }
 
     /**
@@ -36,7 +36,6 @@ public class FraudCheckController {
     @GetMapping(value = "/", produces = "application/json")
     @ResponseBody
     public Map<String, Object> index() {
-        Tracer tracer = openTelemetry.getTracer(OtelConfiguration.TRACER_NAME);
         Span span = tracer.spanBuilder("index").startSpan();
 
         try (Scope ss = span.makeCurrent()) {
@@ -54,7 +53,6 @@ public class FraudCheckController {
     @PostMapping(value = "/", produces = "application/json")
     @ResponseBody
     public Map<String, Object> index(@RequestBody ChargeRequest input) {
-        Tracer tracer = openTelemetry.getTracer(OtelConfiguration.TRACER_NAME);
         Span span = tracer.spanBuilder("charge request").startSpan();
 
         try (Scope ss = span.makeCurrent()) {

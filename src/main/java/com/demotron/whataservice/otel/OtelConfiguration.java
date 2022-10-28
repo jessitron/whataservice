@@ -20,6 +20,7 @@ import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
@@ -32,21 +33,29 @@ public interface OtelConfiguration {
 
         OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
         if (openTelemetry == null) {
-            Resource resource = Resource.getDefault()
-                .merge(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "whataservice")));
-
-            SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.getDefault()).build())
-                .setResource(resource)
-                .build();
-
-            openTelemetry = OpenTelemetrySdk.builder()
-                .setTracerProvider(sdkTracerProvider)
-                .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
-                .buildAndRegisterGlobal();
-
-            Runtime.getRuntime().addShutdownHook(new Thread(sdkTracerProvider::shutdown));
+            openTelemetry = AutoConfiguredOpenTelemetrySdk
+                .initialize()
+                .getOpenTelemetrySdk();
         }
+
+        return openTelemetry;
+    }
+
+    private static OpenTelemetry manualBuilder() {
+        Resource resource = Resource.getDefault()
+            .merge(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "whataservice")));
+
+        SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
+            .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.getDefault()).build())
+            .setResource(resource)
+            .build();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(sdkTracerProvider::shutdown));
+
+        OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
+            .setTracerProvider(sdkTracerProvider)
+            .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+            .buildAndRegisterGlobal();
 
         return openTelemetry;
     }

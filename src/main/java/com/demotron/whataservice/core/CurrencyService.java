@@ -22,7 +22,6 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -37,7 +36,7 @@ public class CurrencyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyService.class);
 
-    private Tracer tracer;
+    private final Tracer tracer;
 
     public CurrencyService(OpenTelemetry openTelemetry) {
         this.tracer = openTelemetry.getTracer(OtelConfiguration.TRACER_NAME);
@@ -48,23 +47,22 @@ public class CurrencyService {
             return Response.OK;
         }
 
-        Span parentSpan = tracer.spanBuilder("perform all checks").startSpan();
+        Span span = tracer.spanBuilder("perform all checks").startSpan();
 
-        try (Scope ss = parentSpan.makeCurrent()) {
+        try (Scope ss = span.makeCurrent()) {
             return FraudCheckFunctions.ALL_CHECKS.stream()
-                .map(checker -> performOneCheck(currencyCode, checker, parentSpan))
+                .map(checker -> performOneCheck(currencyCode, checker))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(Response.OK);
         } finally {
-            parentSpan.end();
+            span.end();
         }
     }
 
-    private String performOneCheck(String currencyCode, Function<String, String> checker, Span parentSpan) {
+    private String performOneCheck(String currencyCode, Function<String, String> checker) {
         Span span = tracer
             .spanBuilder("call wiki for currency")
-            .setParent(Context.current().with(parentSpan))
             .startSpan();
 
         // Make the span the current span
