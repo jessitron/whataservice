@@ -20,6 +20,7 @@ import com.demotron.whataservice.otel.OtelConfiguration;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -34,10 +35,10 @@ public class CurrencyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyService.class);
 
-    private OpenTelemetry openTelemetry;
+    private Tracer tracer;
 
     public CurrencyService(OpenTelemetry openTelemetry) {
-        this.openTelemetry = openTelemetry;
+        this.tracer = openTelemetry.getTracer(OtelConfiguration.TRACER_NAME);
     }
 
     public String specialFraudChecks(String currencyCode) {
@@ -45,16 +46,24 @@ public class CurrencyService {
             return Response.OK;
         }
 
-        return FraudCheckFunctions.ALL_CHECKS.stream()
-            .map(checker -> performOneCheck(currencyCode, checker))
-            .filter(Objects::nonNull)
-            .findFirst()
-            .orElse(Response.OK);
+        Span parentSpan = tracer.spanBuilder("perform all checks").startSpan();
+
+        try (Scope ss = parentSpan.makeCurrent()) {
+            return FraudCheckFunctions.ALL_CHECKS.stream()
+                .map(checker -> performOneCheck(currencyCode, checker, parentSpan))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(Response.OK);
+        } finally {
+            parentSpan.end();
+        }
     }
 
-    private String performOneCheck(String currencyCode, Function<String, String> checker) {
-        Tracer tracer = openTelemetry.getTracer(OtelConfiguration.TRACER_NAME);
-        Span span = tracer.spanBuilder("call wiki for currency").startSpan();
+    private String performOneCheck(String currencyCode, Function<String, String> checker, Span parentSpan) {
+        Span span = tracer
+            .spanBuilder("call wiki for currency")
+            .setParent(Context.current().with(parentSpan))
+            .startSpan();
 
         // Make the span the current span
         try (Scope ss = span.makeCurrent()) {
