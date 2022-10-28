@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 public class WhataserviceApplication {
 
     public static void main(String[] args) {
+        System.out.println("Hello world....");
         SpringApplication.run(WhataserviceApplication.class, args);
     }
 
