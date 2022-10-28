@@ -35,8 +35,6 @@ public class FraudCheckController {
 		return out;
 	}
 	
-
-
 	/* TODO: error handling. Gives a 500 NPE on invalid input 😱 */
 	@PostMapping(value = "/",
 		 produces = "application/json")
