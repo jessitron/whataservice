@@ -1,4 +1,5 @@
 package com.demotron.whataservice;
+
 /*
  {
   "amount": {
@@ -20,6 +21,6 @@ package com.demotron.whataservice;
  */
 public class ChargeRequest {
 
-  public Amount amount;
+    public Amount amount;
 
 }

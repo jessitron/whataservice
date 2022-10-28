@@ -1,4 +1,5 @@
 package com.demotron.whataservice;
+
 /*
  {
   "amount": {
@@ -12,5 +13,5 @@ package com.demotron.whataservice;
   },
   */
 public class Amount {
-  public String currencyCode;
+    public String currencyCode;
 }
