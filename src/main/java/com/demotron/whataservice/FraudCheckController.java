@@ -15,11 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
-
 @RestController
 public class FraudCheckController {
 
@@ -43,19 +38,14 @@ public class FraudCheckController {
 		 produces = "application/json")
 	@ResponseBody 
 	public Map<String,Object> index(@RequestBody ChargeRequest input) throws IOException {
-		var span = Span.current();
 		var currencyCode = input.amount.currencyCode;
-		span.setAttribute("app.currencyCode", currencyCode);
 		var out = new HashMap<String, Object>();
 		out.put("currencyCode",input.amount.currencyCode);
 		out.put("sus", specialFraudChecks(currencyCode).equals(OK));
 		out.put("message", specialFraudChecks(currencyCode));
-		span.setAttribute("app.result.sus", out.get("sus").toString());
-		span.setAttribute("app.result.message", out.get("message").toString());
 		return out;
 	}
 
-	@WithSpan("special fraud check")
 	private String specialFraudChecks(String currencyCode) {
 		if (currencyCode.equals("USD")) {
 			return OK;
@@ -72,14 +62,10 @@ public class FraudCheckController {
 	}
 	private static final String OK = "Can't complain";
 
-	@WithSpan("one check")
 	public String performOneCheck(String currencyCode, Function<String, String> checker) {
-		Span span = Span.current();
-		span.setAttribute("app.currencyCode", currencyCode);
 		try {
 			Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/ISO_4217").get();
 			System.out.println(doc.title());
-			span.setAttribute("app.sourceOfInfo", doc.title());
 			Elements currencyCodeRows = doc.select("td:containsOwn(" + currencyCode + ")");
 			for (Element currencyCodeTd : currencyCodeRows) {
 				try {
@@ -92,11 +78,9 @@ public class FraudCheckController {
 					}
 				} catch (Exception e) {
 					// well, there might be another currencyCodeRow that works, so keep going
-					span.recordException(e, Attributes.of(AttributeKey.stringKey("currencyCodeTd"), currencyCodeTd.html()));
 				}
 			}
 		} catch(Exception e) {
-			span.recordException(e, null);
 			e.printStackTrace();
 			return "Failed to check";
 		}
