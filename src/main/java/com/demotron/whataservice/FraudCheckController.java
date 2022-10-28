@@ -43,10 +43,12 @@ public class FraudCheckController {
 	@ResponseBody 
 	public Map<String,Object> index(@RequestBody ChargeRequest input) throws IOException {
 		var span = Span.current();
+		var currencyCode = input.amount.currencyCode;
+		span.setAttribute("app.currencyCode", currencyCode);
 		var out = new HashMap<String, Object>();
-		out.put("currencyCode", input.amount.currencyCode);
-		out.put("sus", specialFraudChecks(input.amount.currencyCode).equals(OK));
-		out.put("message", specialFraudChecks(input.amount.currencyCode));
+		out.put("currencyCode",input.amount.currencyCode);
+		out.put("sus", specialFraudChecks(currencyCode).equals(OK));
+		out.put("message", specialFraudChecks(currencyCode));
 		span.setAttribute("app.result.sus", out.get("sus").toString());
 		span.setAttribute("app.result.message", out.get("message").toString());
 		return out;
@@ -70,8 +72,9 @@ public class FraudCheckController {
 	private static final String OK = "Can't complain";
 
 	@WithSpan("one check")
-	public String performOneCheck(@SpanAttribute("app.currencyCode") String currencyCode, Function<String, String> checker) {
+	public String performOneCheck(String currencyCode, Function<String, String> checker) {
 		Span span = Span.current();
+		span.setAttribute("app.currencyCode", currencyCode);
 		try {
 			Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/ISO_4217").get();
 			System.out.println(doc.title());
