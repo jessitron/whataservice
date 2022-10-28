@@ -44,6 +44,7 @@ function doTheThing() {
     cowsay "OH NO"
   fi
 
+  date
   echo "😊 well that was exciting 😊 "
 }
 
