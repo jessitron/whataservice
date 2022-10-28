@@ -42,15 +42,21 @@ public class FraudCheckController {
 		 produces = "application/json")
 	@ResponseBody 
 	public Map<String,Object> index(@RequestBody ChargeRequest input) throws IOException {
+		var span = Span.current();
 		var out = new HashMap<String, Object>();
 		out.put("currencyCode", input.amount.currencyCode);
 		out.put("sus", specialFraudChecks(input.amount.currencyCode).equals(OK));
 		out.put("message", specialFraudChecks(input.amount.currencyCode));
+		span.setAttribute("app.result.sus", out.get("sus").toString());
+		span.setAttribute("app.result.message", out.get("message").toString());
 		return out;
 	}
 
 	@WithSpan("special fraud check")
 	private String specialFraudChecks(String currencyCode) {
+		if (currencyCode == "USD") {
+			return OK;
+		}
     for (int i = 0; i < FraudCheckFunctions.allChecks.size(); i++) 
 		{
 			var checker = FraudCheckFunctions.allChecks.get(i);
@@ -81,7 +87,7 @@ public class FraudCheckController {
 						return check;
 					}
 				} catch (Exception e) {
-					// well, there might be another one
+					// well, there might be another currencyCodeRow that works, so keep going
 					span.recordException(e, Attributes.of(AttributeKey.stringKey("currencyCodeTd"), currencyCodeTd.html()));
 				}
 			}
