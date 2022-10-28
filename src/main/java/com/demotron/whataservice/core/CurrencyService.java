@@ -52,7 +52,7 @@ public class CurrencyService {
     }
 
     private String performOneCheck(String currencyCode, Function<String, String> checker) {
-        Tracer tracer = openTelemetry.getTracer("");
+        Tracer tracer = openTelemetry.getTracer("com.demotron.whataservice");
         Span span = tracer.spanBuilder("call wiki for currency").startSpan();
 
         // Make the span the current span
