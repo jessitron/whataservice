@@ -26,6 +26,8 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
 public interface OtelConfiguration {
+    String TRACER_NAME = "com.demotron.whataservice";
+
     static OpenTelemetry initOpenTelemetry() {
 
         OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();

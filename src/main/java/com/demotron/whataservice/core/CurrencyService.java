@@ -16,6 +16,7 @@ package com.demotron.whataservice.core;
 import java.util.Objects;
 import java.util.function.Function;
 
+import com.demotron.whataservice.otel.OtelConfiguration;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
@@ -52,7 +53,7 @@ public class CurrencyService {
     }
 
     private String performOneCheck(String currencyCode, Function<String, String> checker) {
-        Tracer tracer = openTelemetry.getTracer("com.demotron.whataservice");
+        Tracer tracer = openTelemetry.getTracer(OtelConfiguration.TRACER_NAME);
         Span span = tracer.spanBuilder("call wiki for currency").startSpan();
 
         // Make the span the current span
