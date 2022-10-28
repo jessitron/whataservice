@@ -23,6 +23,10 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 @RestController
 public class FraudCheckController {
 
+	/**
+	 * mostly for test purposes
+	 * @return the same thing every time
+	 */
 	@GetMapping(value = "/",
 		 produces = "application/json")
 	@ResponseBody
@@ -34,7 +38,8 @@ public class FraudCheckController {
 	}
 	
 	/* TODO: error handling. Gives a 500 NPE on invalid input 😱 */
-	@PostMapping(value = "/",
+	@PostMapping(
+		value = "/",
 		 produces = "application/json")
 	@ResponseBody 
 	public Map<String,Object> index(@RequestBody ChargeRequest input) throws IOException {
