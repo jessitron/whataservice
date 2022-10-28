@@ -45,7 +45,7 @@ public interface OtelConfiguration {
                 .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                 .buildAndRegisterGlobal();
 
-            Runtime.getRuntime().addShutdownHook(new Thread(sdkTracerProvider::close));
+            Runtime.getRuntime().addShutdownHook(new Thread(sdkTracerProvider::shutdown));
         }
 
         return openTelemetry;
