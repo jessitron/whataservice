@@ -36,7 +36,7 @@ public interface OtelConfiguration {
                 .merge(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "whataservice")));
 
             SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder().build()).build())
+                .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.getDefault()).build())
                 .setResource(resource)
                 .build();
 
