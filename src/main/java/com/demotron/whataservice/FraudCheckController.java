@@ -56,7 +56,7 @@ public class FraudCheckController {
 
 	@WithSpan("special fraud check")
 	private String specialFraudChecks(String currencyCode) {
-		if (currencyCode == "USD") {
+		if (currencyCode.equals("USD")) {
 			return OK;
 		}
     for (int i = 0; i < FraudCheckFunctions.allChecks.size(); i++) 
