@@ -40,7 +40,7 @@ public interface OtelConfiguration {
                 .setResource(resource)
                 .build();
 
-            openTelemetry = OpenTelemetrySdk.builder()
+            OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
                 .setTracerProvider(sdkTracerProvider)
                 .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                 .buildAndRegisterGlobal();
