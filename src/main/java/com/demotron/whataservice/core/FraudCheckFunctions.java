@@ -1,4 +1,4 @@
-package com.demotron.whataservice;
+package com.demotron.whataservice.core;
 
 import java.util.List;
 import java.util.function.Function;

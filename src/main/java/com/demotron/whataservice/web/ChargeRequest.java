@@ -1,4 +1,4 @@
-package com.demotron.whataservice;
+package com.demotron.whataservice.web;
 
 /*
  {
