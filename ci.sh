@@ -1,19 +1,6 @@
 #!/bin/bash
 
-echo "Let's do some building!"
-
-function srcToServiceName() {
-  service=$1
-  if [[ $service == "paymentservice" ]]; then
-    echo "payment-service"
-    return 0
-  fi
-  if [[ $service == "adservice" ]]; then
-    echo "ad-service"
-    return 0
-  fi
-  echo "unknown-dataset"
-}
+cowsay "Let's do some building!"
 
 function doTheThing() {
   prevCommit=$(git rev-parse HEAD)
@@ -36,7 +23,6 @@ function doTheThing() {
   echo "something happened! These files changed:"
   git diff --name-only $prevCommit
   currentCommit=$(git rev-parse HEAD)
-  changedServices=$(git diff --name-only $prevCommit | grep ^src | cut -d '/' -f 2)
   startTime=$(date +%s)
 
   echo "
@@ -46,11 +32,8 @@ function doTheThing() {
   returned=$?
 
   if [[ -n $HONEYCOMB_API_KEY ]]; then
-    echo "The following services were changed: $changedServices"
-    for service in $changedServices; do
-      serviceDataset=$(srcToServiceName $service)
-      echo "Creating marker in $serviceDataset for $service" 
-      curl https://api.honeycomb.io/1/markers/$serviceDataset -X POST  \
+      echo "Creating marker in whataservice" 
+      curl https://api.honeycomb.io/1/markers/whataservice -X POST  \
         -H "X-Honeycomb-Team: $HONEYCOMB_API_KEY"  \
         -d "{\"message\":\"deploy $currentCommit \", \"type\":\"deploy\", \"start_time\":$startTime}"
     done
