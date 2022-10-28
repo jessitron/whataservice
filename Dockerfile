@@ -21,10 +21,6 @@ FROM eclipse-temurin:19-jre
 
 WORKDIR /usr/src/app/
 
-ARG version=1.16.0
-ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$version/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar
-ENV JAVA_TOOL_OPTIONS=-javaagent:/app/opentelemetry-javaagent.jar
-
 COPY --from=builder /usr/src/app .
 
 EXPOSE 8080
