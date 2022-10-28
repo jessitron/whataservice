@@ -32,11 +32,10 @@ function doTheThing() {
   returned=$?
 
   if [[ -n $HONEYCOMB_API_KEY ]]; then
-      echo "Creating marker in whataservice" 
-      curl https://api.honeycomb.io/1/markers/whataservice -X POST  \
-        -H "X-Honeycomb-Team: $HONEYCOMB_API_KEY"  \
-        -d "{\"message\":\"deploy $currentCommit \", \"type\":\"deploy\", \"start_time\":$startTime}"
-    done
+    echo "Creating marker in whataservice" 
+    curl https://api.honeycomb.io/1/markers/whataservice -X POST  \
+      -H "X-Honeycomb-Team: $HONEYCOMB_API_KEY"  \
+      -d "{\"message\":\"deploy $currentCommit \", \"type\":\"deploy\", \"start_time\":$startTime}"
   else
     echo "HONEYCOMB_API_KEY not defined"
   fi
