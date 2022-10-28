@@ -30,8 +30,8 @@ public interface OtelConfiguration {
 
     static OpenTelemetry initOpenTelemetry() {
 
-        OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
-        if (openTelemetry == null) {
+        //OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
+        //if (openTelemetry == null) {
             Resource resource = Resource.getDefault()
                 .merge(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "whataservice")));
 
@@ -40,13 +40,13 @@ public interface OtelConfiguration {
                 .setResource(resource)
                 .build();
 
-            openTelemetry = OpenTelemetrySdk.builder()
+            OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
                 .setTracerProvider(sdkTracerProvider)
                 .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                 .buildAndRegisterGlobal();
 
             Runtime.getRuntime().addShutdownHook(new Thread(sdkTracerProvider::shutdown));
-        }
+        //}
 
         return openTelemetry;
     }
